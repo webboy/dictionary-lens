@@ -1,47 +1,49 @@
 <template>
-  <q-page class="row items-center justify-evenly">
-    <example-component
-      title="Example component"
-      active
-      :todos="todos"
-      :meta="meta"
-    ></example-component>
+  <q-page class="bg-black">
+    <!-- Camera Container -->
+    <CameraContainer v-if="!showPhotoFrame" />
+
+    <!-- Photo Frame -->
+    <PhotoFrame
+      v-if="showPhotoFrame"
+      :photoSrc="photo"
+      @close="handleClosePhotoFrame"
+    />
+
+    <!-- Take Photo Button -->
+    <TakePhotoButton v-if="!showPhotoFrame" @takePhoto="handleTakePhoto" />
   </q-page>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { Todo, Meta } from 'components/models';
-import ExampleComponent from 'components/ExampleComponent.vue';
+import { useCamera } from '../composables/useCamera';
+import CameraContainer from 'components/CameraContainer.vue';
+import PhotoFrame from 'components/PhotoFrame.vue';
+import TakePhotoButton from 'components/TakePhotoButton.vue';
 
-defineOptions({
-  name: 'IndexPage'
-});
+const { capturePhoto } = useCamera();
 
-const todos = ref<Todo[]>([
-  {
-    id: 1,
-    content: 'ct1'
-  },
-  {
-    id: 2,
-    content: 'ct2'
-  },
-  {
-    id: 3,
-    content: 'ct3'
-  },
-  {
-    id: 4,
-    content: 'ct4'
-  },
-  {
-    id: 5,
-    content: 'ct5'
+const showPhotoFrame = ref(false);
+const photo = ref('');
+
+function handleTakePhoto() {
+  photo.value = capturePhoto(); // Capture photo from the camera feed
+  if (photo.value) {
+    showPhotoFrame.value = true;
+  } else {
+    console.error('Failed to capture photo');
   }
-]);
+}
 
-const meta = ref<Meta>({
-  totalCount: 1200
-});
+function handleClosePhotoFrame() {
+  photo.value = ''; // Clear the photo when closing the frame
+  showPhotoFrame.value = false;
+}
 </script>
+
+
+
+<style scoped>
+/* Add any global styles specific to this page here */
+</style>
