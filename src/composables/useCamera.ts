@@ -4,17 +4,20 @@ const cameraFeed = ref<HTMLVideoElement | null>(null);
 const canvas = document.createElement('canvas');
 
 export function useCamera() {
-  function initializeCamera() {
-    navigator.mediaDevices
-      .getUserMedia({ video: true })
-      .then((stream) => {
-        if (cameraFeed.value) {
-          cameraFeed.value.srcObject = stream;
-        }
-      })
-      .catch((err) => {
-        console.error('Error accessing camera:', err);
+  async function initializeCamera() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: { ideal: 'environment' }, // Use the back camera
+        },
       });
+
+      if (cameraFeed.value) {
+        cameraFeed.value.srcObject = stream;
+      }
+    } catch (err) {
+      console.error('Error accessing camera:', err);
+    }
   }
 
   function capturePhoto(): string {

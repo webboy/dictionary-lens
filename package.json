@@ -14,6 +14,8 @@
   },
   "dependencies": {
     "@quasar/extras": "^1.16.4",
+    "@tensorflow-models/coco-ssd": "^2.2.3",
+    "@tensorflow/tfjs": "^4.22.0",
     "axios": "^1.2.1",
     "composables": "^1.0.0",
     "pinia": "^2.3.0",
