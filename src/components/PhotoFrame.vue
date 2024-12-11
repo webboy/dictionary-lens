@@ -37,88 +37,62 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import * as cocoSsd from '@tensorflow-models/coco-ssd';
-import '@tensorflow/tfjs';
-
-// Define the type for detections
-import type { DetectedObject } from '@tensorflow-models/coco-ssd';
+import { ref, onMounted } from 'vue';
+import { useYOLO } from '../composables/useYOLO';
+import type { Detection } from '../composables/useYOLO'; // Import Detection as a type
 
 defineProps({
   photoSrc: {
     type: String,
-    required: true
-  }
+    required: true,
+  },
 });
+
 const emit = defineEmits(['close']);
+const { loadModel, detectObjects } = useYOLO(); // Only destructure runtime properties
 const photoElement = ref<HTMLImageElement | null>(null);
-// Explicitly type detections as an array of DetectedObject
-const detections = ref<DetectedObject[]>([]);
+const detections = ref<Detection[]>([]); // Explicitly type detections as Detection[]
 
-const canvasElement = ref<HTMLCanvasElement | null>(null);
+onMounted(() => {
+  loadModel(); // Load the YOLO model when the component mounts
+});
 
-function closeFrame() {
+function closeFrame(){
   emit('close');
 }
 
 async function processPhoto() {
-  console.log('Loading COCO-SSD model...');
-  const model = await cocoSsd.load(); // Load COCO-SSD model
-
-  console.log('photoElement:', photoElement.value); // Debugging line
-
-  if (photoElement.value) {
-    console.log('Detecting objects...');
-    detections.value = await model.detect(photoElement.value);
-
-    console.log('Detections:', detections.value);
-    console.log(`Detected objects: ${detections.value.map(d => d.class).join(', ')}`);
-    drawBoundingBoxes(detections.value); // Call function to draw boxes
-  } else {
+  if (!photoElement.value) {
     console.error('No photo element available for processing.');
+    return;
   }
+
+  detections.value = await detectObjects(photoElement.value); // Use detectObjects from useYOLO
+  console.log('Detections:', detections.value);
+  drawBoundingBoxes(detections.value);
 }
 
-function drawBoundingBoxes(objects: DetectedObject[]) {
-  if (!canvasElement.value || !photoElement.value) {
-    console.error('Canvas or photo element not available.');
-    return;
-  }
+function drawBoundingBoxes(objects: Detection[]) {
+  const canvas = document.querySelector('.bounding-box-canvas') as HTMLCanvasElement;
+  const context = canvas?.getContext('2d');
+  if (!context) return;
 
-  const canvas = canvasElement.value;
-  const image = photoElement.value;
-
-  // Set canvas size to match the image
-  canvas.width = image.width;
-  canvas.height = image.height;
-
-  const context = canvas.getContext('2d');
-  if (!context) {
-    console.error('Canvas context not available.');
-    return;
-  }
-
-  // Clear any existing drawings
   context.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Draw bounding boxes for each detected object
-  objects.forEach((object) => {
-    const [x, y, width, height] = object.bbox;
-    context.strokeStyle = 'red'; // Box color
+  objects.forEach(({ bbox, score, class: classId }) => {
+    const [x, y, width, height] = bbox;
+
+    context.strokeStyle = 'red';
     context.lineWidth = 2;
     context.strokeRect(x, y, width, height);
 
-    // Draw label
     context.fillStyle = 'red';
     context.font = '16px Arial';
-    context.fillText(
-      `${object.class} (${(object.score * 100).toFixed(1)}%)`,
-      x,
-      y > 10 ? y - 5 : 10
-    );
+    context.fillText(`Class: ${classId}, Confidence: ${(score * 100).toFixed(1)}%`, x, y - 5);
   });
 }
 </script>
+
 
 <style scoped>
 .photo-frame {
