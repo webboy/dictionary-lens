@@ -1,102 +1,85 @@
+//MainLayout.vue
 <template>
-  <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
+  <q-layout view="lHh Lpr lff">
+    <!-- Header for non-camera pages -->
+    <q-header elevated v-if="!isCameraRoute">
       <q-toolbar>
-        <q-btn
-          flat
-          dense
-          round
-          icon="menu"
-          aria-label="Menu"
-          @click="toggleLeftDrawer"
-        />
-
-        <q-toolbar-title>
-          Quasar App
+        <q-toolbar-title class="text-center">
+          Dictionary Lens
         </q-toolbar-title>
-
-        <div>Quasar v{{ $q.version }}</div>
       </q-toolbar>
     </q-header>
 
-    <q-drawer
-      v-model="leftDrawerOpen"
-      show-if-above
-      bordered
-    >
-      <q-list>
-        <q-item-label
-          header
-        >
-          Essential Links
-        </q-item-label>
-
-        <EssentialLink
-          v-for="link in linksList"
-          :key="link.title"
-          v-bind="link"
-        />
-      </q-list>
-    </q-drawer>
-
-    <q-page-container>
+    <!-- Main Content -->
+    <q-page-container :class="{ 'no-padding': isCameraRoute }">
       <router-view />
     </q-page-container>
+
+    <!-- Bottom Navigation -->
+    <q-footer bordered class="bg-primary">
+      <q-tabs
+        v-model="currentTab"
+        class="text-white"
+        active-color="white"
+        indicator-color="transparent"
+        narrow-indicator
+        align="justify"
+      >
+        <q-tab
+          name="camera"
+          icon="photo_camera"
+          label="Camera"
+          to="/"
+        />
+        <q-tab
+          name="dictionary"
+          icon="menu_book"
+          label="Dictionary"
+          to="/dictionary"
+        />
+        <q-tab
+          name="settings"
+          icon="settings"
+          label="Settings"
+          to="/settings"
+        />
+      </q-tabs>
+    </q-footer>
   </q-layout>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import EssentialLink, { type EssentialLinkProps } from 'components/EssentialLink.vue';
+import { ref, computed } from 'vue'
+import { useRoute } from 'vue-router'
 
-const linksList: EssentialLinkProps[] = [
-  {
-    title: 'Docs',
-    caption: 'quasar.dev',
-    icon: 'school',
-    link: 'https://quasar.dev'
-  },
-  {
-    title: 'Github',
-    caption: 'github.com/quasarframework',
-    icon: 'code',
-    link: 'https://github.com/quasarframework'
-  },
-  {
-    title: 'Discord Chat Channel',
-    caption: 'chat.quasar.dev',
-    icon: 'chat',
-    link: 'https://chat.quasar.dev'
-  },
-  {
-    title: 'Forum',
-    caption: 'forum.quasar.dev',
-    icon: 'record_voice_over',
-    link: 'https://forum.quasar.dev'
-  },
-  {
-    title: 'Twitter',
-    caption: '@quasarframework',
-    icon: 'rss_feed',
-    link: 'https://twitter.quasar.dev'
-  },
-  {
-    title: 'Facebook',
-    caption: '@QuasarFramework',
-    icon: 'public',
-    link: 'https://facebook.quasar.dev'
-  },
-  {
-    title: 'Quasar Awesome',
-    caption: 'Community Quasar projects',
-    icon: 'favorite',
-    link: 'https://awesome.quasar.dev'
-  }
-];
+const route = useRoute()
+const currentTab = ref(route.path === '/' ? 'camera' : route.path.slice(1))
 
-const leftDrawerOpen = ref(false);
-
-function toggleLeftDrawer () {
-  leftDrawerOpen.value = !leftDrawerOpen.value;
-}
+// Hide header and adjust padding for camera route
+const isCameraRoute = computed(() => route.path === '/')
 </script>
+
+<style>
+.no-padding {
+  padding: 0 !important;
+}
+
+/* Make footer tabs more touch-friendly */
+.q-tab {
+  padding: 12px 4px;
+}
+
+/* Ensure the tabs take equal space */
+.q-tabs {
+  height: 60px;
+}
+
+.q-tab__content {
+  min-width: 32px;
+  font-size: 12px;
+}
+
+.q-tab__icon {
+  font-size: 24px;
+}
+</style>
