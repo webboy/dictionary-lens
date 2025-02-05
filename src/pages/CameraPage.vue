@@ -221,8 +221,4 @@ onUnmounted(() => {
   height: 100%;
   object-fit: cover;
 }
-
-.bg-opacity-70 {
-  background-color: rgba(0, 0, 0, 0.7);
-}
 </style>
