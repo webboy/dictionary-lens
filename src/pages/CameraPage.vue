@@ -11,11 +11,6 @@
         muted
       />
 
-      <!-- Loading overlay -->
-      <div v-if="isLoading" class="absolute-full flex flex-center bg-black bg-opacity-70">
-        <q-spinner-dots color="white" size="40" />
-      </div>
-
       <!-- Detection overlay -->
       <detection-overlay
         v-if="showDetections"
@@ -81,7 +76,10 @@ const $q = useQuasar()
 async function setupCamera(): Promise<void> {
 
   try {
-    isLoading.value = true
+    $q.loading.show({
+      message: 'Accessing camera...',
+      backgroundColor: 'black'
+    })
     const constraints = {
       video: {
         facingMode: settingsStore.cameraType === 'front' ? 'user' : 'environment',
@@ -101,7 +99,7 @@ async function setupCamera(): Promise<void> {
       message: 'Could not access camera. Please check permissions.',
     })
   } finally {
-    isLoading.value = false
+    $q.loading.hide()
   }
 }
 
@@ -109,7 +107,10 @@ async function setupCamera(): Promise<void> {
 async function captureImage(): Promise<void> {
   if (!videoRef.value || isLoading.value) return
 
-  isLoading.value = true
+  $q.loading.show({
+    message: 'Capturing image...',
+    backgroundColor: 'black'
+  })
 
   try {
 
@@ -140,14 +141,16 @@ async function captureImage(): Promise<void> {
       message: 'Failed to detect objects in the image.',
     })
   } finally {
-    isLoading.value = false
+    $q.loading.hide()
   }
 }
 
 // Word selection handler
 async function onWordSelected(word: string): Promise<void> {
-  console.log('Selected word:', word)
-  isLoading.value = true
+  $q.loading.show({
+    message: 'Searching for translation...',
+    backgroundColor: 'black'
+  })
   try {
 
     selectedWord.value = word
@@ -181,7 +184,7 @@ async function onWordSelected(word: string): Promise<void> {
       message: 'Failed to get translation'
     })
   } finally {
-    isLoading.value = false
+    $q.loading.hide()
   }
 }
 
