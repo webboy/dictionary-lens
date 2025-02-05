@@ -63,23 +63,4 @@ const isCameraRoute = computed(() => route.path === '/')
 .no-padding {
   padding: 0 !important;
 }
-
-/* Make footer tabs more touch-friendly */
-.q-tab {
-  padding: 12px 4px;
-}
-
-/* Ensure the tabs take equal space */
-.q-tabs {
-  height: 60px;
-}
-
-.q-tab__content {
-  min-width: 32px;
-  font-size: 12px;
-}
-
-.q-tab__icon {
-  font-size: 24px;
-}
 </style>
