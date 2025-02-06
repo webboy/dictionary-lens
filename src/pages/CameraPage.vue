@@ -51,12 +51,12 @@ import { useQuasar } from 'quasar'
 import { useSettingsStore } from 'stores/settingsStore'
 import DetectionOverlay from 'components/DetectionOverlay.vue'
 import TranslationDialog from 'components/TranslationDialog.vue'
-import { detectionService } from 'src/services/detection/DetectionService'
 import { databaseService} from 'src/services/database/DatabaseService'
 import { translationService } from 'src/services/translation/TranslationService'
 import type { Detection } from 'src/types'
 import { Capacitor } from '@capacitor/core'
 import { Camera } from '@capacitor/camera'
+import { DetectionServiceFactory } from 'src/services/detection/DetectionServiceFactory'
 
 // Component refs
 const videoRef = ref<HTMLVideoElement | null>(null)
@@ -102,9 +102,30 @@ async function setupCamera(): Promise<void> {
       throw new Error('Camera permission not granted')
     }
 
+    // Wait for mediaDevices to be available
+    let retries = 0;
+    const maxRetries = 20; // 10 seconds total
+
+    while (!navigator.mediaDevices && retries < maxRetries) {
+      await new Promise(resolve => setTimeout(resolve, 500));
+      retries++;
+      console.log(`Waiting for camera... Attempt ${retries}/${maxRetries}`);
+    }
+
+    if (!navigator.mediaDevices) {
+      throw new Error('Camera initialization failed. Please restart the app.');
+    }
+
+    // Ensure we have the necessary APIs
+    if (!navigator.mediaDevices?.getUserMedia) {
+      throw new Error('Camera API is not supported on this device');
+    }
+
     const constraints = {
       video: {
         facingMode: settingsStore.cameraType === 'front' ? 'user' : 'environment',
+        width: { ideal: 1920 },
+        height: { ideal: 1080 }
       },
       audio: false,
     }
@@ -151,14 +172,28 @@ async function captureImage(): Promise<void> {
     // Convert to data URL
     capturedImage.value = canvas.toDataURL('image/jpeg')
 
+    // Get the selected detection service
+    const detectionService = DetectionServiceFactory.getService(settingsStore.detectionService)
+
     // Detect objects in the image
-    detections.value = await detectionService.detect(capturedImage.value)
+    await detectionService.detect(capturedImage.value).then((result) => {
+      detections.value = result
+    }).finally(() => {
+      console.log('Detection complete using', settingsStore.detectionService)
+    })
+
+    if (detections.value.length === 0) {
+      throw new Error('No objects detected in image')
+    }
+
+    console.log('Detected objects:', JSON.stringify(detections.value))
+
     showDetections.value = true
   } catch (error) {
     console.error('Error capturing image:', error)
     $q.notify({
       type: 'negative',
-      message: 'Failed to detect objects in the image.',
+      message: error instanceof Error ? error.message : 'Failed to capture image'
     })
   } finally {
     $q.loading.hide()

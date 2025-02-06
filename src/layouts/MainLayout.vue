@@ -7,7 +7,7 @@
     </q-page-container>
 
     <!-- Bottom Navigation -->
-    <q-footer bordered class="bg-dark">
+    <q-footer bordered elevated class="bg-dark" reveal>
       <div class="row no-wrap justify-evenly q-py-sm">
         <q-btn
           flat
