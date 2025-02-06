@@ -26,8 +26,9 @@
       <div class="flex justify-center">
         <q-btn
           round
+          ripple
           size="lg"
-          color="primary"
+          color="warning"
           icon="photo_camera"
           :disable="isLoading"
           @click="captureImage"
