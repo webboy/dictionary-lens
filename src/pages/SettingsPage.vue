@@ -53,7 +53,7 @@
 
     <!-- App Info -->
     <div class="text-center q-pt-xl">
-      <div class="text-caption text-grey-7">Dictionary Lens v1.0.0</div>
+      <div class="text-caption text-grey-7">Dictionary Lens v{{ AppVersion }}</div>
     </div>
   </q-page>
 </template>
@@ -63,6 +63,8 @@ import { computed } from 'vue'
 import { useSettingsStore } from 'stores/settingsStore'
 
 const settingsStore = useSettingsStore()
+
+const AppVersion = import.meta.env.VITE_APP_VERSION
 
 // Camera settings
 const cameraType = computed({
