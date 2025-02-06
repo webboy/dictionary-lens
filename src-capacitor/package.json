@@ -1,6 +1,6 @@
 {
   "name": "dictionary-lens",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Dictionary Lens App",
   "author": "webboy <extramedia.nemanja@gmail.com>",
   "private": true,
@@ -9,6 +9,7 @@
     "@capacitor/app": ">=6.0.0",
     "@capacitor/camera": ">=6.0.0",
     "@capacitor/cli": ">=6.0.0",
-    "@capacitor/core": ">=6.0.0"
+    "@capacitor/core": ">=6.0.0",
+    "@jcesarmobile/ssl-skip": "^0.4.0"
   }
 }

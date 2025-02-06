@@ -1,60 +1,96 @@
 import { ref } from 'vue';
 import { defineStore } from 'pinia';
-
-export type CameraType = 'front' | 'back';
+import type { DetectionServiceType } from 'src/services/detection/DetectionServiceFactory';
 
 interface Settings {
   language: string;
-  cameraType: CameraType;
+  cameraType: 'front' | 'back';
+  detectionService: DetectionServiceType;
+  apiKeys: Partial<Record<DetectionServiceType, string>>
+  endpoints: Partial<Record<DetectionServiceType, string>>
 }
 
 const STORAGE_KEY = 'dictionary-lens-settings';
 
 const DEFAULT_SETTINGS: Settings = {
   language: 'de',
-  cameraType: 'back'
-};
-
-const getStoredSettings = (): Settings => {
-  const stored = localStorage.getItem(STORAGE_KEY);
-  return stored ? { ...DEFAULT_SETTINGS, ...JSON.parse(stored) } : DEFAULT_SETTINGS;
+  cameraType: 'back',
+  detectionService: 'tensorflow',
+  apiKeys: {},
+  endpoints: {}
 };
 
 export const useSettingsStore = defineStore('settings', () => {
-  const language = ref<string>(getStoredSettings().language);
-  const cameraType = ref<CameraType>(getStoredSettings().cameraType);
+  // Load stored settings or use defaults
+  const stored = localStorage.getItem(STORAGE_KEY);
+  const initialSettings = stored ? { ...DEFAULT_SETTINGS, ...JSON.parse(stored) } : DEFAULT_SETTINGS;
 
-  const saveSettings = () => {
+  // State
+  const language = ref(initialSettings.language);
+  const cameraType = ref(initialSettings.cameraType);
+  const detectionService = ref(initialSettings.detectionService);
+  const apiKeys = ref<Partial<Record<DetectionServiceType, string>>>(initialSettings.apiKeys)
+  const endpoints = ref<Partial<Record<DetectionServiceType, string>>>(initialSettings.endpoints)
+
+  // Save settings
+  function saveSettings() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
       language: language.value,
-      cameraType: cameraType.value
+      cameraType: cameraType.value,
+      detectionService: detectionService.value,
+      apiKeys: apiKeys.value,
+      endpoints: endpoints.value
     }));
-  };
+  }
 
-  const setLanguage = (newLanguage: string) => {
+  // Actions
+  function setLanguage(newLanguage: string) {
     language.value = newLanguage;
     saveSettings();
-  };
+  }
 
-  const setCameraType = (type: CameraType) => {
+  function setCameraType(type: 'front' | 'back') {
     cameraType.value = type;
     saveSettings();
-  };
+  }
 
-  const resetToDefaults = () => {
-    language.value = DEFAULT_SETTINGS.language;
-    cameraType.value = DEFAULT_SETTINGS.cameraType;
+  function setDetectionService(service: DetectionServiceType) {
+    detectionService.value = service;
     saveSettings();
-  };
+  }
+
+  function setApiKey(service: DetectionServiceType, key: string) {
+    apiKeys.value = { ...apiKeys.value, [service]: key }
+    saveSettings()
+  }
+
+  function getApiKey(service: DetectionServiceType): string | undefined {
+    return apiKeys.value[service]
+  }
+
+  function setEndpoint(service: DetectionServiceType, endpoint: string) {
+    endpoints.value = { ...endpoints.value, [service]: endpoint }
+    saveSettings()
+  }
+
+  function getEndpoint(service: DetectionServiceType): string | undefined {
+    return endpoints.value[service]
+  }
 
   return {
     // State
     language,
     cameraType,
+    detectionService,
+    apiKeys,
 
     // Actions
     setLanguage,
     setCameraType,
-    resetToDefaults
+    setDetectionService,
+    setApiKey,
+    getApiKey,
+    setEndpoint,
+    getEndpoint
   };
 });

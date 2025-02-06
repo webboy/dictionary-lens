@@ -1,12 +1,5 @@
 import { getDatabase } from 'src/boot/db'
-
-export interface WordEntry {
-  sourceWord: string // English noun (also serves as key)
-  language: string // ISO language code
-  targetWord: string // Word in target language
-  translation: string // JSON string of language-specific attributes
-  capturedAt: Date
-}
+import type { WordEntry } from 'src/types'
 
 class DatabaseService {
   // Get a word by its English noun

@@ -9,47 +9,55 @@
   >
     <q-card class="translation-card">
       <q-card-section class="row items-center q-pb-none">
-        <div class="text-h6">{{ word }}</div>
+        <div class="text-h6">{{ word }} - ({{ currentLanguage }})</div>
         <q-space />
         <q-btn icon="close" flat round dense v-close-popup />
       </q-card-section>
 
-      <q-card-section>
-        <template v-if="translation">
-          <!-- German specific translation -->
-          <template v-if="currentLanguage === 'de'">
-            <div class="row q-mb-md">
-              <div class="col">
-                <div class="text-subtitle2">Article</div>
-                <div class="text-h5 q-mt-sm">{{ germanTranslation?.article }}</div>
-              </div>
-              <div class="col">
-                <div class="text-subtitle2">Word</div>
-                <div class="text-h5 q-mt-sm">{{ germanTranslation?.word }}</div>
-              </div>
-              <div class="col">
-                <div class="text-subtitle2">Plural</div>
-                <div class="text-h5 q-mt-sm">{{ germanTranslation?.plural }}</div>
-              </div>
-            </div>
-
-            <div class="text-subtitle2">Examples</div>
+      <q-card-section v-if="translation">
+        <q-list dense bordered>
+          <q-item dense>
+            <q-item-section>
+              <q-item-label>Article</q-item-label>
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>{{ germanTranslation?.article }}</q-item-label>
+            </q-item-section>
+          </q-item>
+          <q-separator />
+          <q-item dense>
+            <q-item-section>
+              <q-item-label>Word</q-item-label>
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>{{ germanTranslation?.word }}</q-item-label>
+            </q-item-section>
+          </q-item>
+          <q-separator />
+          <q-item dense>
+            <q-item-section>
+              <q-item-label>Plural</q-item-label>
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>{{ germanTranslation?.plural }}</q-item-label>
+            </q-item-section>
+          </q-item>
+          <q-separator />
+          <q-item>
             <q-list>
+              <q-item>
+                <q-item-section>
+                  <q-item-label class="text-bold">Examples:</q-item-label>
+                </q-item-section>
+              </q-item>
               <q-item v-for="(example, index) in germanTranslation?.examples" :key="index">
                 <q-item-section>
                   <q-item-label>{{ example }}</q-item-label>
                 </q-item-section>
               </q-item>
             </q-list>
-          </template>
-
-          <!-- Other languages can be added here -->
-        </template>
-
-        <div v-else class="text-center q-pa-md">
-          <q-spinner-dots color="primary" size="40" />
-          <div class="text-subtitle1 q-mt-sm">Loading translation...</div>
-        </div>
+          </q-item>
+        </q-list>
       </q-card-section>
     </q-card>
   </q-dialog>
