@@ -57,6 +57,7 @@ import type { Detection } from 'src/types'
 import { Capacitor } from '@capacitor/core'
 import { Camera } from '@capacitor/camera'
 import { DetectionServiceFactory } from 'src/services/detection/DetectionServiceFactory'
+import { analyticsService } from 'src/services/analytics/FirebaseAnalyticsService'
 
 // Component refs
 const videoRef = ref<HTMLVideoElement | null>(null)
@@ -135,6 +136,7 @@ async function setupCamera(): Promise<void> {
     if (videoRef.value) {
       videoRef.value.srcObject = stream.value
     }
+    analyticsService.trackCameraOpen()
   } catch (error) {
     console.error('Error accessing camera:', error)
     $q.notify({
@@ -186,7 +188,7 @@ async function captureImage(): Promise<void> {
       throw new Error('No objects detected in image')
     }
 
-    console.log('Detected objects:', JSON.stringify(detections.value))
+    analyticsService.trackObjectDetection(detections.value.length, settingsStore.detectionService)
 
     showDetections.value = true
   } catch (error) {
@@ -232,6 +234,10 @@ async function onWordSelected(word: string): Promise<void> {
     }
 
     showTranslation.value = true
+
+    // Track translation event
+    analyticsService.trackWordLookUp(selectedWord.value, settingsStore.language)
+
   } catch (error) {
     console.error('Error getting translation:', error)
     $q.notify({
