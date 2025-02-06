@@ -88,8 +88,4 @@ const languageOptions = [
 </script>
 
 <style scoped>
-/* Make sure select dropdowns align properly */
-:deep(.q-field__native) {
-  text-align: right;
-}
 </style>
