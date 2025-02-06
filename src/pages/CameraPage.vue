@@ -54,6 +54,8 @@ import { detectionService } from 'src/services/detection/DetectionService'
 import { databaseService} from 'src/services/database/DatabaseService'
 import { translationService } from 'src/services/translation/TranslationService'
 import type { Detection } from 'src/types'
+import { Capacitor } from '@capacitor/core'
+import { Camera } from '@capacitor/camera'
 
 // Component refs
 const videoRef = ref<HTMLVideoElement | null>(null)
@@ -72,6 +74,18 @@ const translation = ref<string | null>(null)
 const settingsStore = useSettingsStore()
 const $q = useQuasar()
 
+// Check permissions
+async function checkPermissions() {
+  if (Capacitor.isNativePlatform()) {
+    const status = await Camera.requestPermissions();
+    if (status.camera !== 'granted') {
+      console.error('Camera permission not granted');
+      return false;
+    }
+  }
+  return true;
+}
+
 // Camera setup
 async function setupCamera(): Promise<void> {
 
@@ -80,6 +94,13 @@ async function setupCamera(): Promise<void> {
       message: 'Accessing camera...',
       backgroundColor: 'black'
     })
+
+    // Check permissions
+    const hasPermissions = await checkPermissions()
+    if (!hasPermissions) {
+      throw new Error('Camera permission not granted')
+    }
+
     const constraints = {
       video: {
         facingMode: settingsStore.cameraType === 'front' ? 'user' : 'environment',
@@ -96,7 +117,7 @@ async function setupCamera(): Promise<void> {
     console.error('Error accessing camera:', error)
     $q.notify({
       type: 'negative',
-      message: 'Could not access camera. Please check permissions.',
+      message: error instanceof Error ? error.message : 'Could not access camera. Please check permissions.',
     })
   } finally {
     $q.loading.hide()
@@ -113,8 +134,6 @@ async function captureImage(): Promise<void> {
   })
 
   try {
-
-
     // Create a canvas to capture the image
     const canvas = document.createElement('canvas')
     canvas.width = videoRef.value.videoWidth
