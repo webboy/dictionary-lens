@@ -52,7 +52,8 @@ export class HuggingFaceService implements IDetectionService {
   }
 
   validate(): boolean {
-    if (!this.apiKey) {
+
+    if (!this.apiKey || this.apiKey === '') {
       throw new Error('Hugging Face token is not configured')
     }
     return true

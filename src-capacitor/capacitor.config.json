@@ -1,5 +1,6 @@
 {
   "appId": "com.dictionarylens.app",
   "appName": "Dictionary Lens",
-  "webDir": "www"
+  "webDir": "www",
+  "version": "1.1.2"
 }

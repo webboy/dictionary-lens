@@ -41,6 +41,28 @@
             <div class="text-caption q-mt-xs">Settings</div>
           </div>
         </q-btn>
+
+        <q-btn
+          flat
+          :class="{ 'text-warning': isInfoRoute, 'text-primary': !isInfoRoute }"
+        >
+          <div class="column items-center">
+            <q-icon name="menu" size="24px" />
+            <div class="text-caption q-mt-xs">More</div>
+          </div>
+
+          <q-menu anchor="top right" self="bottom right">
+            <q-list style="min-width: 200px">
+              <q-item clickable v-close-popup :to="{ name: 'about' }">
+                <q-item-section>About Dictionary Lens</q-item-section>
+              </q-item>
+
+              <q-item clickable v-close-popup :to="{ name: 'privacy' }">
+                <q-item-section>Privacy Policy</q-item-section>
+              </q-item>
+            </q-list>
+          </q-menu>
+        </q-btn>
       </div>
     </q-footer>
   </q-layout>
@@ -54,6 +76,11 @@ const route = useRoute()
 
 // Hide header and adjust padding for camera route
 const isCameraRoute = computed(() => route.path === '/')
+
+// Check if current route is about or privacy
+const isInfoRoute = computed(() =>
+  route.path === '/about' || route.path === '/privacy'
+)
 </script>
 
 <style>
